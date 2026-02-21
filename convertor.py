@@ -1,35 +1,27 @@
 import streamlit as st
 from PIL import Image
 import io
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
-from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import Image as RLImage
-from reportlab.platypus import Paragraph
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfbase import pdfmetrics
-from reportlab.platypus import SimpleDocTemplate
-from docx import Document
-from pdf2docx import Converter
-from docx2pdf import convert
-import os
 import tempfile
+import os
 
-st.title("📸 Smart Document Converter App")
+from reportlab.platypus import SimpleDocTemplate, Image as RLImage
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import inch
+from docx import Document
+from docx.shared import Inches
+from pdf2docx import Converter
+
+st.title("📸 Smart Document Converter (Cloud Version)")
 
 option = st.sidebar.selectbox(
     "Choose Function",
-    ["Camera to PDF/DOCX", "DOCX to PDF", "PDF to DOCX"]
+    ["Camera to PDF/DOCX", "PDF to DOCX"]
 )
 
 # ---------------------------------------------------
 # 📸 CAMERA SECTION
 # ---------------------------------------------------
 if option == "Camera to PDF/DOCX":
-
-    st.subheader("Take Photo")
 
     image_file = st.camera_input("Capture your document")
 
@@ -40,7 +32,7 @@ if option == "Camera to PDF/DOCX":
 
         col1, col2 = st.columns(2)
 
-        # IMAGE TO PDF
+        # IMAGE → PDF
         with col1:
             if st.button("Convert to PDF"):
 
@@ -61,12 +53,12 @@ if option == "Camera to PDF/DOCX":
                     mime="application/pdf"
                 )
 
-        # IMAGE TO DOCX
+        # IMAGE → DOCX
         with col2:
             if st.button("Convert to DOCX"):
 
                 document = Document()
-                document.add_picture(image_file, width=docx.shared.Inches(4))
+                document.add_picture(image_file, width=Inches(4))
 
                 docx_buffer = io.BytesIO()
                 document.save(docx_buffer)
@@ -79,30 +71,7 @@ if option == "Camera to PDF/DOCX":
                 )
 
 # ---------------------------------------------------
-# DOCX TO PDF
-# ---------------------------------------------------
-elif option == "DOCX to PDF":
-
-    uploaded_docx = st.file_uploader("Upload DOCX file", type=["docx"])
-
-    if uploaded_docx:
-
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp_docx:
-            tmp_docx.write(uploaded_docx.read())
-            tmp_docx_path = tmp_docx.name
-
-        output_pdf_path = tmp_docx_path.replace(".docx", ".pdf")
-        convert(tmp_docx_path, output_pdf_path)
-
-        with open(output_pdf_path, "rb") as f:
-            st.download_button(
-                "Download PDF",
-                f,
-                file_name="converted.pdf"
-            )
-
-# ---------------------------------------------------
-# PDF TO DOCX
+# PDF → DOCX
 # ---------------------------------------------------
 elif option == "PDF to DOCX":
 
